@@ -15,8 +15,7 @@ using namespace std;
 static random_device rd;
 static mt19937 rng(rd());
 
-template <typename T>
-void bubbleSort(T array[], const int length) {
+void bubbleSort(int array[], const int length) {
     for (int i = 0; i < length - 1; i++) {
         for (int j = 0; j < length - 1 - i; j++) {
             if (array[j] > array[j + 1])
@@ -25,8 +24,7 @@ void bubbleSort(T array[], const int length) {
     }
 }
 
-template <typename T>
-void selectionSort(T array[], const int length) {
+void selectionSort(int array[], const int length) {
     for (int i = 0; i < length - 1; i++) {
         int minIndex = i;
         for (int j = i + 1; j < length; j++) {
@@ -37,13 +35,11 @@ void selectionSort(T array[], const int length) {
     }
 }
 
-template <typename T>
-void bucketSort(T array[], const int length) {
+void bucketSort(int array[], const int length) {
     // TODO: implement
 }
 
-template <typename T>
-void quickSort(T array[], const int start, const int end) {
+void quickSort(int array[], const int start, const int end) {
     // Base Case: 0 or 1 elements in the array
     if (start >= end)
         return;
@@ -74,8 +70,7 @@ void quickSort(T array[], const int start, const int end) {
     quickSort(array, lastSmaller + 1, end);
 }
 
-template <typename T>
-void mergeSort(T array[], const int start, const int end) {
+void mergeSort(int array[], const int start, const int end) {
     // Base Case: 0 or 1 elements in the array
     if (start >= end)
         return;

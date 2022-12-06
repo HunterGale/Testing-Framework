@@ -37,6 +37,7 @@ string formatWithCommas(int value);
 int main() {
 	const int N = 10000;
 
+	// Fill and shuffle array with N elements
 	int array[N];
 	for (int i = 0; i < N; i++) {
 		array[i] = i;
@@ -44,6 +45,7 @@ int main() {
 	srand(time(0));
 	random_shuffle(begin(array), end(array));
 
+	// Execute and time each sort algorithm with a copy of the original array
 	int arrayCopy[N];
 	copy(begin(array), end(array), begin(arrayCopy));
 	int bubbleSortCppTime = timeSort(arrayCopy, N, BUBBLE_SORT, CPP);
@@ -66,25 +68,63 @@ int main() {
 	copy(begin(array), end(array), begin(arrayCopy));
 	int mergeSortAsmTime = timeSort(arrayCopy, N, MERGE_SORT, ASSEMBLY);
 
-	cout << setw(28) << right << "Bubble Sort (C++) = " << formatWithCommas(bubbleSortCppTime) << " nanoseconds" << endl;
-	cout << setw(28) << right << "Bubble Sort (Assembly) = " << formatWithCommas(bubbleSortAsmTime) << " nanoseconds" << endl;
-	cout << setw(28) << right << "Difference = " << formatWithCommas(bubbleSortCppTime - bubbleSortAsmTime) << " nanoseconds" << endl;
+	// Format each value with commas using a helper function
+	string bubbleSortCppTimeStr = formatWithCommas(bubbleSortCppTime);
+	string bubbleSortAsmTimeStr = formatWithCommas(bubbleSortAsmTime);
+	string bubbleSortTimeDiffStr = formatWithCommas(bubbleSortCppTime - bubbleSortAsmTime);
+	string selectionSortCppTimeStr = formatWithCommas(selectionSortCppTime);
+	string selectionSortAsmTimeStr = formatWithCommas(selectionSortAsmTime);
+	string selectionSortTimeDiffStr = formatWithCommas(selectionSortCppTime - selectionSortAsmTime);
+	string bucketSortCppTimeStr = formatWithCommas(bucketSortCppTime);
+	string bucketSortAsmTimeStr = formatWithCommas(bucketSortAsmTime);
+	string bucketSortTimeDiffStr = formatWithCommas(bucketSortCppTime - bucketSortAsmTime);
+	string quickSortCppTimeStr = formatWithCommas(quickSortCppTime);
+	string quickSortAsmTimeStr = formatWithCommas(quickSortAsmTime);
+	string quickSortTimeDiffStr = formatWithCommas(quickSortCppTime - quickSortAsmTime);
+	string mergeSortCppTimeStr = formatWithCommas(mergeSortCppTime);
+	string mergeSortAsmTimeStr = formatWithCommas(mergeSortAsmTime);
+	string mergeSortTimeDiffStr = formatWithCommas(mergeSortCppTime - mergeSortAsmTime);
+
+	// Determine the length of the largest string for spacing
+	const int outputStringSizes[] = { 
+		bubbleSortCppTimeStr.length(),
+		bubbleSortAsmTimeStr.length(),
+		bubbleSortTimeDiffStr.length(),
+		selectionSortCppTimeStr.length(),
+		selectionSortAsmTimeStr.length(),
+		selectionSortTimeDiffStr.length(),
+		bucketSortCppTimeStr.length(),
+		bucketSortAsmTimeStr.length(),
+		bucketSortTimeDiffStr.length(),
+		quickSortCppTimeStr.length(),
+		quickSortAsmTimeStr.length(),
+		quickSortTimeDiffStr.length(),
+		mergeSortCppTimeStr.length(),
+		mergeSortAsmTimeStr.length(),
+		mergeSortTimeDiffStr.length()
+	};
+	int spacing = *max_element(begin(outputStringSizes), end(outputStringSizes));
+
+	// Display output
+	cout << setw(28) << right << "Bubble Sort (C++) = " << setw(spacing) << right << bubbleSortCppTimeStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Bubble Sort (Assembly) = " << setw(spacing) << right << bubbleSortAsmTimeStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Difference = " << setw(spacing) << right << bubbleSortTimeDiffStr << " nanoseconds" << endl;
 	cout << endl;
-	cout << setw(28) << right << "Selection Sort (C++) = " << formatWithCommas(selectionSortCppTime) << " nanoseconds" << endl;
-	cout << setw(28) << right << "Selection Sort (Assembly) = " << formatWithCommas(selectionSortAsmTime) << " nanoseconds" << endl;
-	cout << setw(28) << right << "Difference = " << formatWithCommas(selectionSortCppTime - selectionSortAsmTime) << " nanoseconds" << endl;
+	cout << setw(28) << right << "Selection Sort (C++) = " << setw(spacing) << right << selectionSortCppTimeStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Selection Sort (Assembly) = " << setw(spacing) << right << selectionSortAsmTimeStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Difference = " << setw(spacing) << right << selectionSortTimeDiffStr << " nanoseconds" << endl;
 	cout << endl;
-	cout << setw(28) << right << "Bucket Sort (C++) = " << formatWithCommas(bucketSortCppTime) << " nanoseconds" << endl;
-	cout << setw(28) << right << "Bucket Sort (Assembly) = " << formatWithCommas(bucketSortAsmTime) << " nanoseconds" << endl;
-	cout << setw(28) << right << "Difference = " << formatWithCommas(bucketSortCppTime - bucketSortAsmTime) << " nanoseconds" << endl;
+	cout << setw(28) << right << "Bucket Sort (C++) = " << setw(spacing) << right << bucketSortCppTimeStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Bucket Sort (Assembly) = " << setw(spacing) << right << bucketSortAsmTimeStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Difference = " << setw(spacing) << right << bucketSortTimeDiffStr << " nanoseconds" << endl;
 	cout << endl;
-	cout << setw(28) << right << "Quick Sort (C++) = " << formatWithCommas(quickSortCppTime) << " nanoseconds" << endl;
-	cout << setw(28) << right << "Quick Sort (Assembly) = " << formatWithCommas(quickSortAsmTime) << " nanoseconds" << endl;
-	cout << setw(28) << right << "Difference = " << formatWithCommas(quickSortCppTime - quickSortAsmTime) << " nanoseconds" << endl;
+	cout << setw(28) << right << "Quick Sort (C++) = " << setw(spacing) << right << quickSortCppTimeStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Quick Sort (Assembly) = " << setw(spacing) << right << quickSortAsmTimeStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Difference = " << setw(spacing) << right << quickSortTimeDiffStr << " nanoseconds" << endl;
 	cout << endl;
-	cout << setw(28) << right << "Merge Sort (C++) = " << formatWithCommas(mergeSortCppTime) << " nanoseconds" << endl;
-	cout << setw(28) << right << "Merge Sort (Assembly) = " << formatWithCommas(mergeSortAsmTime) << " nanoseconds" << endl;
-	cout << setw(28) << right << "Difference = " << formatWithCommas(mergeSortCppTime - mergeSortAsmTime) << " nanoseconds" << endl;
+	cout << setw(28) << right << "Merge Sort (C++) = " << setw(spacing) << right << mergeSortCppTimeStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Merge Sort (Assembly) = " << setw(spacing) << right << mergeSortAsmTimeStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Difference = " << setw(spacing) << right << mergeSortTimeDiffStr << " nanoseconds" << endl;
 	cout << endl;
 
 	return EXIT_SUCCESS;
