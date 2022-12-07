@@ -1,10 +1,11 @@
 // A program that compares various sorting algorithms written in Assembly and C++
 // CSI370 - Final Project
 // Author: Cameron LaBounty & Hunter Gale
-// Date: 12/4/2022
+// Date: 12/6/2022
 
 #include <iostream>
 #include <iomanip>
+#include <string>
 #include <algorithm>
 #include <chrono>
 #include "sort.h"
@@ -16,6 +17,10 @@ extern "C" void asmSelectionSort(int array[], const int length);
 extern "C" void asmBucketSort(int array[], const int length);
 extern "C" void asmQuickSort(int array[], const int start, const int end);
 extern "C" void asmMergeSort(int array[], const int start, const int end);
+
+extern "C" void _inplaceMerge(int array[], int start, int middle, int end) {
+	inplace_merge(array + start, array + middle + 1, array + end + 1);
+}
 
 enum SORT_ALGORITHM {
 	BUBBLE_SORT,
