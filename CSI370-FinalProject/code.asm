@@ -1,55 +1,59 @@
 ; A program that compares various sorting algorithms written in Assembly and C++
 ; CSI370 - Final Project
 ; Author: Cameron LaBounty & Hunter Gale
-; Date: 12/6/2022
+; Date: 12/7/2022
 
 _inplaceMerge PROTO
 
 .CODE
 asmBubbleSort PROC
 	push rbp
-
-	xor r8, r8
-	xor r9, r9
-	outerLoop:
-		xor r10, r10
-		innerLoop:
-			mov r11d, SDWORD PTR [rcx + r10 * SDWORD]
-			mov r12d, SDWORD PTR [rcx + r10 * SDWORD + SDWORD]
-			cmp r11d, r12d
-			ja swap
-			swapDone:
-
-			mov r13, rdx
-			sub r13, r9
-			dec r13
-
-			inc r10
-			cmp r10, r13
-			jne innerLoop
-
-		cmp r8, 1
-		jne done
-		xor r8, r8
-
-		mov r14, rdx
-		dec r14
-
-		inc r9
-		cmp r9, r14
-		jne outerLoop
-
-	swap:
-		mov r8, 1
-		mov [rcx + r10 * SDWORD], r12d
-		mov [rcx + r10 * SDWORD + SDWORD], r11d
-		jmp swapDone
-
-	done:
-
+	call asmBubbleSort2
 	pop rbp
 	ret
 asmBubbleSort ENDP
+
+asmBubbleSort2 PROC
+    push rbp                                            ; push base pointer
+    sub rsp, 20h                                        ; allocate 32 bytes of shadow space
+
+    mov [rsp + 20h], rcx                                ; store *array* in shadow space
+	mov [rsp + 18h], rdx                                ; store *length* in shadow space
+
+    xor rax, rax                                        ; set rax to 0 for outerLoop counter (i)
+    outerLoop:                                          ; label for outerLoop
+        xor rbx, rbx                                    ; set rbx to 0 for innerLoop counter (j)
+        innerLoop:                                      ; label for innerLoop
+            mov r8, [rsp + 20h]                         ; set r8 to *array*
+            lea rcx, [r8 + rbx * SDWORD]                ; set rcx to the address of array[j]
+            lea rdx, [r8 + rbx * SDWORD + SDWORD]       ; set rdx to the address of array[j + 1]
+            mov r8d, SDWORD PTR [rcx]                   ; set r8d to the value of array[j]
+            mov r9d, SDWORD PTR [rdx]                   ; set r9d to the value of array[j + 1]
+            
+            cmp r8d, r9d                                ; compare the value of array[j] and the value of array[j + 1]
+            jbe skipSwap                                ; skip swap if array[j] <= array[j + 1]
+            call asmSwap                                ; swap otherwise
+            skipSwap:                                   ; label for skipping swap
+
+            mov r8, [rsp + 18h]                         ; set r8 to *length*
+            dec r8                                      ; set r8 to (*length* - 1)
+            sub r8, rax                                 ; set r8 to (*length* - 1 - i)
+
+            inc rbx                                     ; increment innerLoop counter
+            cmp rbx, r8                                 ; compare the innerLoop counter and (*length* - 1 - i)
+            jne innerLoop                               ; continue looping if j < (*length* - 1 - i)
+
+        mov r8, [rsp + 18h]                             ; set r8 to *length*
+        dec r8                                          ; set r8 to (*length* - 1)
+
+        inc rax                                         ; increment outerLoop counter
+		cmp rax, r8                                     ; compare the outerLoop counter and (*length* - 1)
+		jne outerLoop                                   ; continue looping if i < (*length* - 1)
+
+    add rsp, 20h                                        ; restore stack pointer
+    pop rbp                                             ; pop base pointer
+    ret                                                 ; return from function
+asmBubbleSort2 ENDP
 
 asmSelectionSort PROC
 	push rbp
@@ -139,12 +143,11 @@ asmMergeSortRecursive PROC
 asmMergeSortRecursive ENDP
 
 asmSwap PROC
-	push rbp
-
-	;
-
-	pop rbp
-	ret
+    push rbp            ; push base pointer
+    mov [rcx], r9d      ; move the value of *num2* to the address of *num1*
+    mov [rdx], r8d      ; move the value of *num1* to the address of *num2*
+    pop rbp             ; pop base pointer
+    ret                 ; return from function
 asmSwap ENDP
 
 END
