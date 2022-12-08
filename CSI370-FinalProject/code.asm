@@ -4,6 +4,7 @@
 ; Date: 12/7/2022
 
 _inplaceMerge PROTO
+_randomIndex PROTO
 
 .CODE
 asmBubbleSort PROC
@@ -79,17 +80,105 @@ asmBucketSort ENDP
 
 asmQuickSort PROC
 	push rbp
-	sub rsp, 20h
-
-	; rcx (array)
-	; rdx (start)
-	; r8 (end)
-	; mov r9d, SDWORD PTR [rcx + r10 * SDWORD] (r9d = array[r10])
-
-	add rsp, 20h
+	call asmQuickSortRecursive
 	pop rbp
 	ret
 asmQuickSort ENDP
+
+asmQuickSortRecursive PROC
+	push rbp
+	sub rsp, 20h
+
+	mov [rsp + 20h], rcx			; store *array* in shadow space
+	mov [rsp + 18h], rdx			; store *start* in shadow space
+	mov [rsp + 10h], r8				; store *end* in shadow space
+
+	cmp rdx, r8						; check for base case (start >= end)
+	jge done						; jump to end of function
+
+	mov rcx, rdx					; move start to rcx
+	mov rdx, r8						; move end to rdx
+	call _randomIndex				; get random index in range
+
+									; prepare for moving the pivot to start
+	mov r8, [rsp + 20h]				; move array into r8
+	mov rbx, [rsp + 18h]			; move start into rbx
+	lea rcx, [r8 + rax * SDWORD]	; address of random index
+	lea rdx, [r8 + rbx * SDWORD]	; address of starting index
+	mov r8d, SDWORD PTR [rcx]       ; set r8d to the value of random index
+	mov r9d, SDWORD PTR [rdx]       ; set r9d to the value of array[start]
+	call asmSwap					; move the pivot to the start
+
+									; setup for loop to swap elements smaller than the pivot
+									; with the first element that is larger than it
+	mov rbx, [rsp + 18h]			; move start into rbx to keep track of "lastSmaller"
+	mov rax, rbx					; move start into rax for counter
+	inc rax							; i starts at start + 1
+
+	startLoop:						; start of the loop
+	cmp rax, [rsp + 10h]			; loop will run if (i <= end)
+	ja endLoop						; jump to end of the loop
+	
+									; start setup for "if" statement
+									; checking if (array[i] < array[start])
+	mov r8, [rsp + 20h]				; move array into r8
+	mov r11, [rsp + 18h]			; move start into r11
+	lea rcx, [r8 + rax * SDWORD]	; address of index i
+	lea rdx, [r8 + r11 * SDWORD]	; address of start
+	mov r8d, SDWORD PTR [rcx]       ; set r8d to the value of index i
+	mov r9d, SDWORD PTR [rdx]       ; set r9d to the value of start
+	cmp r8d, r9d					; if (array[i] < array[start])
+	jae skip						; if not, jump to skip
+
+											; prepare for swap(array[i], array[lastSmaller + 1])
+	mov r8, [rsp + 20h]						; move array into r8
+	lea rcx, [r8 + rax * SDWORD]			; address of index i
+	lea rdx, [r8 + rbx * SDWORD + SDWORD]	; address of lastSmaller + 1
+	mov r8d, SDWORD PTR [rcx]				; set r8d to the value of index i
+	mov r9d, SDWORD PTR [rdx]				; set r9d to the value of lastSmaller + 1
+	push rbx								; temp push rbx to stack so we can get it after swap
+	call asmSwap							; swap(array[i], array[lastSmaller + 1])
+	pop rbx									; get rbx (lastSmaller) back
+
+	inc rbx							; inc lastSmaller
+
+	skip:							; label for end of "if" statement
+
+	inc rax							; inc i for the loop
+	jmp startLoop					; start the loop again
+	
+	endLoop:						; label for end of loop			
+
+	mov [rsp + 8h], rbx				; store lastSmaller in shadow Space
+
+									;move parameters for quicksort function into registers
+	mov r8, [rsp + 20h]
+	mov rbx, [rsp + 18h]
+	mov r11, [rsp + 8h]
+	lea rcx, [r8 + rbx * SDWORD]	; address of start index
+	lea rdx, [r8 + r11 * SDWORD]	; address of lastSmaller
+	mov r8d, SDWORD PTR [rcx]       ; set r8d to the value of array[start]
+	mov r9d, SDWORD PTR [rdx]       ; set r9d to the value of array[lastSmaller]
+	call asmSwap
+
+									;move parameters for quicksort function into registers
+	mov rcx, [rsp + 20h]
+	mov rdx, [rsp + 18h]
+	mov r8, [rsp + 8h]
+	dec r8
+	call asmQuickSortRecursive		;quickSort(array, start, lastSmaller - 1)
+
+	mov rcx, [rsp + 20h]
+	mov rdx, [rsp + 8h]
+	mov r8, [rsp + 10h]
+	inc rdx
+	call asmQuickSortRecursive		;quickSort(array, lastSmaller + 1, end)
+
+	done:
+	add rsp, 20h
+	pop rbp
+	ret
+asmQuickSortRecursive ENDP
 
 asmMergeSort PROC
 	push rbp

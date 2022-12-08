@@ -22,6 +22,11 @@ extern "C" void _inplaceMerge(int array[], int start, int middle, int end) {
 	inplace_merge(array + start, array + middle + 1, array + end + 1);
 }
 
+extern "C" int _randomIndex(int start, int end) {
+	uniform_int_distribution<> distr(start, end);
+	return distr(rng);
+}
+
 enum SORT_ALGORITHM {
 	BUBBLE_SORT,
 	SELECTION_SORT,
