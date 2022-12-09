@@ -51,11 +51,53 @@ asmBubbleSort ENDP
 
 asmSelectionSort PROC
 	push rbp
+	mov rbp, rsp
+	sub rsp, 30h					; 20h for shadow, other 10h for params?
 
-	; rcx (array)
-	; rdx (N)
-	; mov r9d, SDWORD PTR [rcx + r10 * SDWORD] (r9d = array[r10])
+	mov [rsp + 20h], rcx			; store *array* in shadow space
+	mov [rsp + 18h], rdx			; store *length* in shadow space
 
+	mov r10, 0						; i starts at 0 for outer loop
+	mov r11, [rsp + 18h]			; move length to r11
+	dec r11							; r11 = (length - 1)
+
+	selectionOuterLoop:
+	cmp r10, r11					; if i >= (length - 1), loop terminates
+	jge done
+
+	mov r12, r10					; move i into minIndex (r12)
+	mov r13, r10					; j = i
+	inc r13							; j = (i + 1)
+	selectionInnerLoop:
+	cmp r13, [rsp + 18h]			; if j >= length, loop terminates
+	jge selectionInnerLoopDone
+
+	mov r8, [rsp + 20h]				; move array into r8
+	lea rcx, [r8 + r13 * SDWORD]	; address of j index
+	lea rdx, [r8 + r12 * SDWORD]	; address of minIndex
+	mov r14d, SDWORD PTR [rcx]      ; set r14d to the value at array[j]
+	mov r15d, SDWORD PTR [rdx]      ; set r15d to the value at array[minIndex]
+	cmp r14d, r15d					; if array[j] >= array[minIndex], skip inner statement
+	jge skipInnerStatement
+
+	mov r12, r13					; minIndex = j
+
+	skipInnerStatement:
+
+	inc r13							; j++
+	jmp selectionInnerLoop			; restart inner loop
+	selectionInnerLoopDone:
+
+	mov r8, [rsp + 20h]				; move array into r8
+	lea rcx, [r8 + r10 * SDWORD]	; address of i index
+	lea rdx, [r8 + r12 * SDWORD]	; address of minIndex
+	call asmSwap					; swap(array[i], array[minIndex])
+
+	inc r10							; i++ for next iteration
+	jmp selectionOuterLoop			; restart the outer loop
+
+	done:
+	mov rsp, rbp
 	pop rbp
 	ret
 asmSelectionSort ENDP
@@ -77,7 +119,7 @@ asmShellSort PROC
 
 	outerLoop:						; label for outer loop
 	cmp rax, 0						; if gap == 0, loop terminates
-	je done
+	je shellDone
 	
 
 	mov r10, [rsp + 10h]			; i starts as the value of gap
@@ -101,7 +143,7 @@ asmShellSort PROC
 	sub rbx, [rsp + 10h]			; subtract gap from rbx
 	mov r8, [rsp + 20h]				; move array into r8
 	lea rcx, [r8 + rbx * SDWORD]	; address of i index
-	mov r13d, SDWORD PTR [rcx]      ; set r12d to the value at array[j - gap]
+	mov r13d, SDWORD PTR [rcx]      ; set r13d to the value at array[j - gap]
 	cmp r13d, r12d					; if array[j - gap] <= temp, loop terminates
 	jle innerLoopDone
 
@@ -133,7 +175,7 @@ asmShellSort PROC
 	jmp outerLoop					; go back to outer loop
 
 
-	done:
+	shellDone:
 	mov rsp, rbp
 	pop rbp
 	ret
@@ -155,7 +197,7 @@ asmQuickSortRecursive PROC
 	mov [rsp + 10h], r8				; store *end* in shadow space
 
 	cmp rdx, r8						; check for base case (start >= end)
-	jge done						; jump to end of function
+	jge quickDone						; jump to end of function
 
 	mov rcx, rdx					; move start to rcx
 	mov rdx, r8						; move end to rdx
@@ -229,7 +271,7 @@ asmQuickSortRecursive PROC
 	inc rdx
 	call asmQuickSortRecursive		;quickSort(array, lastSmaller + 1, end)
 
-	done:
+	quickDone:
 	add rsp, 20h
 	pop rbp
 	ret
@@ -252,7 +294,7 @@ asmMergeSortRecursive PROC
 
 	; Base Case
 	cmp rdx, r8						; compare *start* and *end*
-	jae done						; base case reached if (*start* >= *end*)
+	jae mergeDone						; base case reached if (*start* >= *end*)
 
 	; Recursive Case
 	xor rdx, rdx					; set rdx to 0
@@ -279,7 +321,7 @@ asmMergeSortRecursive PROC
 	mov r9, [rsp + 10h]				; set r9 to *end*
 	call _inplaceMerge				; merge the two halves of the array
 
-	done:							; label for Base Case
+	mergeDone:							; label for Base Case
 
 	add rsp, 20h					; restore stack pointer
 	pop rbp							; pop base pointer
@@ -295,5 +337,12 @@ asmSwap PROC
     pop rbp						; pop base pointer
     ret							; return from function
 asmSwap ENDP
+
+asmRandomIndex PROC
+    push rbp					; push base pointer
+
+    pop rbp						; pop base pointer
+    ret							; return from function
+asmRandomIndex ENDP
 
 END
