@@ -14,7 +14,7 @@ using namespace std;
 
 extern "C" void asmBubbleSort(int array[], const int length);
 extern "C" void asmSelectionSort(int array[], const int length);
-extern "C" void asmBucketSort(int array[], const int length);
+extern "C" void asmShellSort(int array[], const int length);
 extern "C" void asmQuickSort(int array[], const int start, const int end);
 extern "C" void asmMergeSort(int array[], const int start, const int end);
 
@@ -30,7 +30,7 @@ extern "C" int _randomIndex(int start, int end) {
 enum SORT_ALGORITHM {
 	BUBBLE_SORT,
 	SELECTION_SORT,
-	BUCKET_SORT,
+	SHELL_SORT,
 	QUICK_SORT,
 	MERGE_SORT
 };
@@ -66,9 +66,9 @@ int main() {
 	copy(begin(array), end(array), begin(arrayCopy));
 	int selectionSortAsmTime = timeSort(arrayCopy, N, SELECTION_SORT, ASSEMBLY);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int bucketSortCppTime = timeSort(arrayCopy, N, BUCKET_SORT, CPP);
+	int shellSortCppTime = timeSort(arrayCopy, N, SHELL_SORT, CPP);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int bucketSortAsmTime = timeSort(arrayCopy, N, BUCKET_SORT, ASSEMBLY);
+	int shellSortAsmTime = timeSort(arrayCopy, N, SHELL_SORT, ASSEMBLY);
 	copy(begin(array), end(array), begin(arrayCopy));
 	int quickSortCppTime = timeSort(arrayCopy, N, QUICK_SORT, CPP);
 	copy(begin(array), end(array), begin(arrayCopy));
@@ -85,9 +85,9 @@ int main() {
 	string selectionSortCppTimeStr = formatWithCommas(selectionSortCppTime);
 	string selectionSortAsmTimeStr = formatWithCommas(selectionSortAsmTime);
 	string selectionSortTimeDiffStr = formatWithCommas(selectionSortCppTime - selectionSortAsmTime);
-	string bucketSortCppTimeStr = formatWithCommas(bucketSortCppTime);
-	string bucketSortAsmTimeStr = formatWithCommas(bucketSortAsmTime);
-	string bucketSortTimeDiffStr = formatWithCommas(bucketSortCppTime - bucketSortAsmTime);
+	string shellSortCppTimeStr = formatWithCommas(shellSortCppTime);
+	string shellSortAsmTimeStr = formatWithCommas(shellSortAsmTime);
+	string shellSortTimeDiffStr = formatWithCommas(shellSortCppTime - shellSortAsmTime);
 	string quickSortCppTimeStr = formatWithCommas(quickSortCppTime);
 	string quickSortAsmTimeStr = formatWithCommas(quickSortAsmTime);
 	string quickSortTimeDiffStr = formatWithCommas(quickSortCppTime - quickSortAsmTime);
@@ -103,9 +103,9 @@ int main() {
 		selectionSortCppTimeStr.length(),
 		selectionSortAsmTimeStr.length(),
 		selectionSortTimeDiffStr.length(),
-		bucketSortCppTimeStr.length(),
-		bucketSortAsmTimeStr.length(),
-		bucketSortTimeDiffStr.length(),
+		shellSortCppTimeStr.length(),
+		shellSortAsmTimeStr.length(),
+		shellSortTimeDiffStr.length(),
 		quickSortCppTimeStr.length(),
 		quickSortAsmTimeStr.length(),
 		quickSortTimeDiffStr.length(),
@@ -124,9 +124,9 @@ int main() {
 	cout << setw(28) << right << "Selection Sort (Assembly) = " << setw(spacing) << right << selectionSortAsmTimeStr << " nanoseconds" << endl;
 	cout << setw(28) << right << "Difference = " << setw(spacing) << right << selectionSortTimeDiffStr << " nanoseconds" << endl;
 	cout << endl;
-	cout << setw(28) << right << "Bucket Sort (C++) = " << setw(spacing) << right << bucketSortCppTimeStr << " nanoseconds" << endl;
-	cout << setw(28) << right << "Bucket Sort (Assembly) = " << setw(spacing) << right << bucketSortAsmTimeStr << " nanoseconds" << endl;
-	cout << setw(28) << right << "Difference = " << setw(spacing) << right << bucketSortTimeDiffStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Shell Sort (C++) = " << setw(spacing) << right << shellSortCppTimeStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Shell Sort (Assembly) = " << setw(spacing) << right << shellSortAsmTimeStr << " nanoseconds" << endl;
+	cout << setw(28) << right << "Difference = " << setw(spacing) << right << shellSortTimeDiffStr << " nanoseconds" << endl;
 	cout << endl;
 	cout << setw(28) << right << "Quick Sort (C++) = " << setw(spacing) << right << quickSortCppTimeStr << " nanoseconds" << endl;
 	cout << setw(28) << right << "Quick Sort (Assembly) = " << setw(spacing) << right << quickSortAsmTimeStr << " nanoseconds" << endl;
@@ -156,8 +156,8 @@ void sort(int array[], const int length, SORT_ALGORITHM algorithm, LANGUAGE lang
 			case SELECTION_SORT:
 				asmSelectionSort(array, length);
 				break;
-			case BUCKET_SORT:
-				asmBucketSort(array, length);
+			case SHELL_SORT:
+				asmShellSort(array, length);
 				break;
 			case QUICK_SORT:
 				asmQuickSort(array, 0, length - 1);
@@ -175,8 +175,8 @@ void sort(int array[], const int length, SORT_ALGORITHM algorithm, LANGUAGE lang
 			case SELECTION_SORT:
 				selectionSort(array, length);
 				break;
-			case BUCKET_SORT:
-				bucketSort(array, length);
+			case SHELL_SORT:
+				shellSort(array, length);
 				break;
 			case QUICK_SORT:
 				quickSort(array, 0, length - 1);

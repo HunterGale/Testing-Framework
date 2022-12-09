@@ -67,7 +67,7 @@ asmSelectionSort PROC
 	ret
 asmSelectionSort ENDP
 
-asmBucketSort PROC
+asmShellSort PROC
 	push rbp
 
 	; rcx (array)
@@ -76,7 +76,7 @@ asmBucketSort PROC
 
 	pop rbp
 	ret
-asmBucketSort ENDP
+asmShellSort ENDP
 
 asmQuickSort PROC
 	push rbp
