@@ -8,15 +8,8 @@ _randomIndex PROTO
 
 .CODE
 asmBubbleSort PROC
-	push rbp
-	call asmBubbleSort2
-	pop rbp
-	ret
-asmBubbleSort ENDP
-
-asmBubbleSort2 PROC
     push rbp                                            ; push base pointer
-    sub rsp, 20h                                        ; allocate 32 bytes of shadow space
+    sub rsp, 30h                                        ; allocate 32 bytes of shadow space
 
     mov [rsp + 20h], rcx                                ; store *array* in shadow space
 	mov [rsp + 18h], rdx                                ; store *length* in shadow space
@@ -51,10 +44,10 @@ asmBubbleSort2 PROC
 		cmp rax, r8                                     ; compare the outerLoop counter and (*length* - 1)
 		jne outerLoop                                   ; continue looping if i < (*length* - 1)
 
-    add rsp, 20h                                        ; restore stack pointer
+    add rsp, 30h                                        ; restore stack pointer
     pop rbp                                             ; pop base pointer
     ret                                                 ; return from function
-asmBubbleSort2 ENDP
+asmBubbleSort ENDP
 
 asmSelectionSort PROC
 	push rbp
@@ -173,8 +166,6 @@ asmQuickSortRecursive PROC
 	mov rbx, [rsp + 18h]			; move start into rbx
 	lea rcx, [r8 + rax * SDWORD]	; address of random index
 	lea rdx, [r8 + rbx * SDWORD]	; address of starting index
-	mov r8d, SDWORD PTR [rcx]       ; set r8d to the value of random index
-	mov r9d, SDWORD PTR [rdx]       ; set r9d to the value of array[start]
 	call asmSwap					; move the pivot to the start
 
 									; setup for loop to swap elements smaller than the pivot
@@ -202,8 +193,6 @@ asmQuickSortRecursive PROC
 	mov r8, [rsp + 20h]						; move array into r8
 	lea rcx, [r8 + rax * SDWORD]			; address of index i
 	lea rdx, [r8 + rbx * SDWORD + SDWORD]	; address of lastSmaller + 1
-	mov r8d, SDWORD PTR [rcx]				; set r8d to the value of index i
-	mov r9d, SDWORD PTR [rdx]				; set r9d to the value of lastSmaller + 1
 	push rbx								; temp push rbx to stack so we can get it after swap
 	call asmSwap							; swap(array[i], array[lastSmaller + 1])
 	pop rbx									; get rbx (lastSmaller) back
@@ -225,8 +214,6 @@ asmQuickSortRecursive PROC
 	mov r11, [rsp + 8h]
 	lea rcx, [r8 + rbx * SDWORD]	; address of start index
 	lea rdx, [r8 + r11 * SDWORD]	; address of lastSmaller
-	mov r8d, SDWORD PTR [rcx]       ; set r8d to the value of array[start]
-	mov r9d, SDWORD PTR [rdx]       ; set r9d to the value of array[lastSmaller]
 	call asmSwap
 
 									;move parameters for quicksort function into registers
@@ -300,11 +287,13 @@ asmMergeSortRecursive PROC
 asmMergeSortRecursive ENDP
 
 asmSwap PROC
-    push rbp            ; push base pointer
-    mov [rcx], r9d      ; move the value of *num2* to the address of *num1*
-    mov [rdx], r8d      ; move the value of *num1* to the address of *num2*
-    pop rbp             ; pop base pointer
-    ret                 ; return from function
+    push rbp					; push base pointer
+	mov r8d, SDWORD PTR [rcx]	; set r8d to the value at address rcx
+	mov r9d, SDWORD PTR [rdx]	; set r9d to the value at address rdx
+    mov [rcx], r9d				; move the value of *num2* to the address of *num1*
+    mov [rdx], r8d				; move the value of *num1* to the address of *num2*
+    pop rbp						; pop base pointer
+    ret							; return from function
 asmSwap ENDP
 
 END
