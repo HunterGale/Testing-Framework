@@ -36,7 +36,7 @@ void selectionSort(int array[], const int length) {
 }
 
 void shellSort(int array[], const int length) {
-    // C++ implementation taken from here
+    // C++ implementation taken from here:
     // https://www.geeksforgeeks.org/shellsort/
     
     // Start with a big gap, then reduce the gap
@@ -46,7 +46,7 @@ void shellSort(int array[], const int length) {
         // The first gap elements a[0..gap-1] are already in gapped order
         // keep adding one more element until the entire array is
         // gap sorted
-        for (int i = gap; i < length; i += 1)
+        for (int i = gap; i < length; i++)
         {
             // add a[i] to the elements that have been gap sorted
             // save a[i] in temp and make a hole at position i
