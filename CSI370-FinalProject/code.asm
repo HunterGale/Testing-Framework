@@ -62,39 +62,39 @@ asmSelectionSort PROC
 	dec r11							; r11 = (length - 1)
 
 	selectionOuterLoop:
-	cmp r10, r11					; if i >= (length - 1), loop terminates
-	jge done
+		cmp r10, r11					; if i >= (length - 1), loop terminates
+		jge done
 
-	mov r12, r10					; move i into minIndex (r12)
-	mov r13, r10					; j = i
-	inc r13							; j = (i + 1)
-	selectionInnerLoop:
-	cmp r13, [rsp + 18h]			; if j >= length, loop terminates
-	jge selectionInnerLoopDone
+		mov r12, r10					; move i into minIndex (r12)
+		mov r13, r10					; j = i
+		inc r13							; j = (i + 1)
+		selectionInnerLoop:
+			cmp r13, [rsp + 18h]			; if j >= length, loop terminates
+			jge selectionInnerLoopDone
 
-	mov r8, [rsp + 20h]				; move array into r8
-	lea rcx, [r8 + r13 * SDWORD]	; address of j index
-	lea rdx, [r8 + r12 * SDWORD]	; address of minIndex
-	mov r14d, SDWORD PTR [rcx]      ; set r14d to the value at array[j]
-	mov r15d, SDWORD PTR [rdx]      ; set r15d to the value at array[minIndex]
-	cmp r14d, r15d					; if array[j] >= array[minIndex], skip inner statement
-	jge skipInnerStatement
+			mov r8, [rsp + 20h]				; move array into r8
+			lea rcx, [r8 + r13 * SDWORD]	; address of j index
+			lea rdx, [r8 + r12 * SDWORD]	; address of minIndex
+			mov r14d, SDWORD PTR [rcx]      ; set r14d to the value at array[j]
+			mov r15d, SDWORD PTR [rdx]      ; set r15d to the value at array[minIndex]
+			cmp r14d, r15d					; if array[j] >= array[minIndex], skip inner statement
+			jge skipInnerStatement
 
-	mov r12, r13					; minIndex = j
+				mov r12, r13					; minIndex = j
 
-	skipInnerStatement:
+			skipInnerStatement:
 
-	inc r13							; j++
-	jmp selectionInnerLoop			; restart inner loop
-	selectionInnerLoopDone:
+			inc r13							; j++
+			jmp selectionInnerLoop			; restart inner loop
+		selectionInnerLoopDone:
 
-	mov r8, [rsp + 20h]				; move array into r8
-	lea rcx, [r8 + r10 * SDWORD]	; address of i index
-	lea rdx, [r8 + r12 * SDWORD]	; address of minIndex
-	call asmSwap					; swap(array[i], array[minIndex])
+		mov r8, [rsp + 20h]				; move array into r8
+		lea rcx, [r8 + r10 * SDWORD]	; address of i index
+		lea rdx, [r8 + r12 * SDWORD]	; address of minIndex
+		call asmSwap					; swap(array[i], array[minIndex])
 
-	inc r10							; i++ for next iteration
-	jmp selectionOuterLoop			; restart the outer loop
+		inc r10							; i++ for next iteration
+		jmp selectionOuterLoop			; restart the outer loop
 
 	done:
 	mov rsp, rbp
@@ -118,61 +118,61 @@ asmShellSort PROC
 	mov [rsp + 10h], rax			; store on the stack
 
 	outerLoop:						; label for outer loop
-	cmp rax, 0						; if gap == 0, loop terminates
-	je shellDone
+		cmp rax, 0						; if gap == 0, loop terminates
+		je shellDone
 	
 
-	mov r10, [rsp + 10h]			; i starts as the value of gap
-	middleLoop:
-	cmp r10, [rsp + 18h]			; if i >= length, loop terminates
-	jae middleLoopDone
+		mov r10, [rsp + 10h]			; i starts as the value of gap
+		middleLoop:
+			cmp r10, [rsp + 18h]			; if i >= length, loop terminates
+			jae middleLoopDone
 
 
-									; Saving array[i] as "temp"
-	mov r8, [rsp + 20h]				; move array into r8
-	lea rcx, [r8 + r10 * SDWORD]	; address of i index
-	mov r12d, SDWORD PTR [rcx]      ; set r12d to the value at array[i] (aka temp)
+											; Saving array[i] as "temp"
+			mov r8, [rsp + 20h]				; move array into r8
+			lea rcx, [r8 + r10 * SDWORD]	; address of i index
+			mov r12d, SDWORD PTR [rcx]      ; set r12d to the value at array[i] (aka temp)
 
-	mov r11, r10					; j starts at value of i
-	innerLoop:
-	cmp r11, [rsp + 10h]			; if j < gap, loop terminates
-	jl innerLoopDone
-									; Additionally, if array[j - gap] <= temp, loop terminates
-									; First, get array[j - gap]
-	mov rbx, r11					; move j into rbx
-	sub rbx, [rsp + 10h]			; subtract gap from rbx
-	mov r8, [rsp + 20h]				; move array into r8
-	lea rcx, [r8 + rbx * SDWORD]	; address of i index
-	mov r13d, SDWORD PTR [rcx]      ; set r13d to the value at array[j - gap]
-	cmp r13d, r12d					; if array[j - gap] <= temp, loop terminates
-	jle innerLoopDone
+			mov r11, r10					; j starts at value of i
+			innerLoop:
+				cmp r11, [rsp + 10h]			; if j < gap, loop terminates
+				jl innerLoopDone
+												; Additionally, if array[j - gap] <= temp, loop terminates
+												; First, get array[j - gap]
+				mov rbx, r11					; move j into rbx
+				sub rbx, [rsp + 10h]			; subtract gap from rbx
+				mov r8, [rsp + 20h]				; move array into r8
+				lea rcx, [r8 + rbx * SDWORD]	; address of i index
+				mov r13d, SDWORD PTR [rcx]      ; set r13d to the value at array[j - gap]
+				cmp r13d, r12d					; if array[j - gap] <= temp, loop terminates
+				jle innerLoopDone
 
-	mov r8, [rsp + 20h]				; move array into r8 (ik it's redudant)
-	lea rcx, [r8 + r11 * SDWORD]	; move address of array[j] into rcx
-	mov [rcx], r13d					; move the value of array[j - gap] to address of array[j]
+				mov r8, [rsp + 20h]				; move array into r8 (ik it's redudant)
+				lea rcx, [r8 + r11 * SDWORD]	; move address of array[j] into rcx
+				mov [rcx], r13d					; move the value of array[j - gap] to address of array[j]
 
-	sub r11, [rsp + 10h]			; j -= gap
-	jmp innerLoop					; restart inner loop
+				sub r11, [rsp + 10h]			; j -= gap
+				jmp innerLoop					; restart inner loop
 
-	innerLoopDone:
-									; put temp in its correct location
-	mov r8, [rsp + 20h]				; move array into r8 (ik it's redudant)
-	lea rcx, [r8 + r11 * SDWORD]	; move address of array[j] into rcx
-	mov [rcx], r12d					; move the value of temp to address of array[j]
+			innerLoopDone:
+											; put temp in its correct location
+			mov r8, [rsp + 20h]				; move array into r8 (ik it's redudant)
+			lea rcx, [r8 + r11 * SDWORD]	; move address of array[j] into rcx
+			mov [rcx], r12d					; move the value of temp to address of array[j]
 
-	inc r10							; i++
-	jmp middleLoop					; then restart the loop
+			inc r10							; i++
+			jmp middleLoop					; then restart the loop
 
-	middleLoopDone:
+		middleLoopDone:
 
 
-									; calculate the new gap
-	mov rdx, 0						; load rdx:rax with the dividend, old gap
-	mov rax, [rsp + 10h]
-	mov rcx, 2						; load rcx with the divisor, 2
-	div rcx							; quotient in rax
-	mov [rsp + 10h], rax			; store on the stack
-	jmp outerLoop					; go back to outer loop
+										; calculate the new gap
+		mov rdx, 0						; load rdx:rax with the dividend, old gap
+		mov rax, [rsp + 10h]
+		mov rcx, 2						; load rcx with the divisor, 2
+		div rcx							; quotient in rax
+		mov [rsp + 10h], rax			; store on the stack
+		jmp outerLoop					; go back to outer loop
 
 
 	shellDone:
@@ -197,7 +197,7 @@ asmQuickSortRecursive PROC
 	mov [rsp + 10h], r8				; store *end* in shadow space
 
 	cmp rdx, r8						; check for base case (start >= end)
-	jge quickDone						; jump to end of function
+	jge quickDone					; jump to end of function
 
 	mov rcx, rdx					; move start to rcx
 	mov rdx, r8						; move end to rdx
@@ -216,35 +216,35 @@ asmQuickSortRecursive PROC
 	mov rax, rbx					; move start into rax for counter
 	inc rax							; i starts at start + 1
 
-	startLoop:						; start of the loop
-	cmp rax, [rsp + 10h]			; loop will run if (i <= end)
-	ja endLoop						; jump to end of the loop
+	quickLoop:						; start of the loop
+		cmp rax, [rsp + 10h]			; loop will run if (i <= end)
+		ja endLoop						; jump to end of the loop
 	
-									; start setup for "if" statement
-									; checking if (array[i] < array[start])
-	mov r8, [rsp + 20h]				; move array into r8
-	mov r11, [rsp + 18h]			; move start into r11
-	lea rcx, [r8 + rax * SDWORD]	; address of index i
-	lea rdx, [r8 + r11 * SDWORD]	; address of start
-	mov r8d, SDWORD PTR [rcx]       ; set r8d to the value of index i
-	mov r9d, SDWORD PTR [rdx]       ; set r9d to the value of start
-	cmp r8d, r9d					; if (array[i] < array[start])
-	jae skip						; if not, jump to skip
+										; start setup for "if" statement
+										; checking if (array[i] < array[start])
+		mov r8, [rsp + 20h]				; move array into r8
+		mov r11, [rsp + 18h]			; move start into r11
+		lea rcx, [r8 + rax * SDWORD]	; address of index i
+		lea rdx, [r8 + r11 * SDWORD]	; address of start
+		mov r8d, SDWORD PTR [rcx]       ; set r8d to the value of index i
+		mov r9d, SDWORD PTR [rdx]       ; set r9d to the value of start
+		cmp r8d, r9d					; if (array[i] < array[start])
+		jae skip						; if not, jump to skip
 
-											; prepare for swap(array[i], array[lastSmaller + 1])
-	mov r8, [rsp + 20h]						; move array into r8
-	lea rcx, [r8 + rax * SDWORD]			; address of index i
-	lea rdx, [r8 + rbx * SDWORD + SDWORD]	; address of lastSmaller + 1
-	push rbx								; temp push rbx to stack so we can get it after swap
-	call asmSwap							; swap(array[i], array[lastSmaller + 1])
-	pop rbx									; get rbx (lastSmaller) back
+													; prepare for swap(array[i], array[lastSmaller + 1])
+			mov r8, [rsp + 20h]						; move array into r8
+			lea rcx, [r8 + rax * SDWORD]			; address of index i
+			lea rdx, [r8 + rbx * SDWORD + SDWORD]	; address of lastSmaller + 1
+			push rbx								; temp push rbx to stack so we can get it after swap
+			call asmSwap							; swap(array[i], array[lastSmaller + 1])
+			pop rbx									; get rbx (lastSmaller) back
 
-	inc rbx							; inc lastSmaller
+			inc rbx							; inc lastSmaller
 
-	skip:							; label for end of "if" statement
+		skip:							; label for end of "if" statement
 
-	inc rax							; inc i for the loop
-	jmp startLoop					; start the loop again
+		inc rax							; inc i for the loop
+		jmp quickLoop					; start the loop again
 	
 	endLoop:						; label for end of loop			
 
