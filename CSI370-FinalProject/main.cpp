@@ -16,11 +16,7 @@ extern "C" void asmBubbleSort(int array[], const int length);
 extern "C" void asmSelectionSort(int array[], const int length);
 extern "C" void asmShellSort(int array[], const int length);
 extern "C" void asmQuickSort(int array[], const int start, const int end);
-extern "C" void asmMergeSort(int array[], const int start, const int end);
-
-extern "C" void _inplaceMerge(int array[], int start, int middle, int end) {
-	inplace_merge(array + start, array + middle + 1, array + end + 1);
-}
+extern "C" void asmMergeSort(int array[], int temp[], const int start, const int end);
 
 extern "C" int _randomIndex(int start, int end) {
 	uniform_int_distribution<> distr(start, end);
@@ -40,13 +36,13 @@ enum LANGUAGE {
 	CPP
 };
 
-int timeSort(int array[], const int length, SORT_ALGORITHM algorithm, LANGUAGE language);
-void sort(int array[], const int length, SORT_ALGORITHM algorithm, LANGUAGE language);
+int timeSort(int array[], SORT_ALGORITHM algorithm, LANGUAGE language);
+void sort(int array[], SORT_ALGORITHM algorithm, LANGUAGE language);
 string formatWithCommas(int value);
 
-int main() {
-	const int N = 10000;
+const int N = 10000;
 
+int main() {
 	// Fill and shuffle array with N elements
 	int array[N];
 	for (int i = 0; i < N; i++) {
@@ -58,25 +54,25 @@ int main() {
 	// Execute and time each sort algorithm with a copy of the original array
 	int arrayCopy[N];
 	copy(begin(array), end(array), begin(arrayCopy));
-	int bubbleSortCppTime = timeSort(arrayCopy, N, BUBBLE_SORT, CPP);
+	int bubbleSortCppTime = timeSort(arrayCopy, BUBBLE_SORT, CPP);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int bubbleSortAsmTime = timeSort(arrayCopy, N, BUBBLE_SORT, ASSEMBLY);
+	int bubbleSortAsmTime = timeSort(arrayCopy, BUBBLE_SORT, ASSEMBLY);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int selectionSortCppTime = timeSort(arrayCopy, N, SELECTION_SORT, CPP);
+	int selectionSortCppTime = timeSort(arrayCopy, SELECTION_SORT, CPP);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int selectionSortAsmTime = timeSort(arrayCopy, N, SELECTION_SORT, ASSEMBLY);
+	int selectionSortAsmTime = timeSort(arrayCopy, SELECTION_SORT, ASSEMBLY);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int shellSortCppTime = timeSort(arrayCopy, N, SHELL_SORT, CPP);
+	int shellSortCppTime = timeSort(arrayCopy, SHELL_SORT, CPP);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int shellSortAsmTime = timeSort(arrayCopy, N, SHELL_SORT, ASSEMBLY);
+	int shellSortAsmTime = timeSort(arrayCopy, SHELL_SORT, ASSEMBLY);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int quickSortCppTime = timeSort(arrayCopy, N, QUICK_SORT, CPP);
+	int quickSortCppTime = timeSort(arrayCopy, QUICK_SORT, CPP);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int quickSortAsmTime = timeSort(arrayCopy, N, QUICK_SORT, ASSEMBLY);
+	int quickSortAsmTime = timeSort(arrayCopy, QUICK_SORT, ASSEMBLY);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int mergeSortCppTime = timeSort(arrayCopy, N, MERGE_SORT, CPP);
+	int mergeSortCppTime = timeSort(arrayCopy, MERGE_SORT, CPP);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int mergeSortAsmTime = timeSort(arrayCopy, N, MERGE_SORT, ASSEMBLY);
+	int mergeSortAsmTime = timeSort(arrayCopy, MERGE_SORT, ASSEMBLY);
 
 	// Format each value with commas using a helper function
 	string bubbleSortCppTimeStr = formatWithCommas(bubbleSortCppTime);
@@ -140,49 +136,50 @@ int main() {
 	return EXIT_SUCCESS;
 }
 
-int timeSort(int array[], const int length, SORT_ALGORITHM algorithm, LANGUAGE language) {
+int timeSort(int array[], SORT_ALGORITHM algorithm, LANGUAGE language) {
 	chrono::steady_clock::time_point start = chrono::steady_clock::now();
-	sort(array, length, algorithm, language);
+	sort(array, algorithm, language);
 	chrono::steady_clock::time_point stop = chrono::steady_clock::now();
 	return chrono::duration_cast<chrono::nanoseconds>(stop - start).count();
 }
 
-void sort(int array[], const int length, SORT_ALGORITHM algorithm, LANGUAGE language) {
+void sort(int array[], SORT_ALGORITHM algorithm, LANGUAGE language) {
 	if (language == ASSEMBLY) {
 		switch (algorithm) {
 			case BUBBLE_SORT:
-				asmBubbleSort(array, length);
+				asmBubbleSort(array, N);
 				break;
 			case SELECTION_SORT:
-				asmSelectionSort(array, length);
+				asmSelectionSort(array, N);
 				break;
 			case SHELL_SORT:
-				asmShellSort(array, length);
+				asmShellSort(array, N);
 				break;
 			case QUICK_SORT:
-				asmQuickSort(array, 0, length - 1);
+				asmQuickSort(array, 0, N - 1);
 				break;
 			case MERGE_SORT:
-				asmMergeSort(array, 0, length - 1);
+				int temp[N]; // O(N) space is needed for inplace merge
+				asmMergeSort(array, temp, 0, N - 1);
 				break;
 		}
 	}
 	else {
 		switch (algorithm) {
 			case BUBBLE_SORT:
-				bubbleSort(array, length);
+				bubbleSort(array, N);
 				break;
 			case SELECTION_SORT:
-				selectionSort(array, length);
+				selectionSort(array, N);
 				break;
 			case SHELL_SORT:
-				shellSort(array, length);
+				shellSort(array, N);
 				break;
 			case QUICK_SORT:
-				quickSort(array, 0, length - 1);
+				quickSort(array, 0, N - 1);
 				break;
 			case MERGE_SORT:
-				mergeSort(array, 0, length - 1);
+				mergeSort(array, 0, N - 1);
 				break;
 		}
 	}
