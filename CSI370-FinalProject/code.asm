@@ -3,7 +3,6 @@
 ; Author: Cameron LaBounty & Hunter Gale
 ; Date: 12/7/2022
 
-_inplaceMerge PROTO
 _randomIndex PROTO
 
 .CODE
@@ -244,14 +243,15 @@ asmMergeSort ENDP
 
 asmMergeSortRecursive PROC
 	push rbp						; push base pointer
-	sub rsp, 20h					; allocate 32 bytes of shadow space
+	sub rsp, 30h					; allocate 48 bytes of shadow space
 
-	mov [rsp + 20h], rcx			; store *array* in shadow space
-	mov [rsp + 18h], rdx			; store *start* in shadow space
-	mov [rsp + 10h], r8				; store *end* in shadow space
+	mov [rsp + 28h], rcx			; store *array* in shadow space
+	mov [rsp + 20h], rdx			; store *temp* in shadow space
+	mov [rsp + 18h], r8				; store *start* in shadow space
+	mov [rsp + 10h], r9				; store *end* in shadow space
 
 	; Base Case
-	cmp rdx, r8						; compare *start* and *end*
+	cmp r8, r9						; compare *start* and *end*
 	jae done						; base case reached if (*start* >= *end*)
 
 	; Recursive Case
@@ -262,26 +262,29 @@ asmMergeSortRecursive PROC
 	div rcx							; run (*start* + *end*) / 2
 	mov [rsp + 8h], rax				; store *middle* in shadow space
 
-	mov rcx, [rsp + 20h]			; set rcx to *array*
-	mov rdx, [rsp + 18h]			; set rdx to *start*
-	mov r8, [rsp + 8h]				; set r8 to *middle*
+	mov rcx, [rsp + 28h]			; set rcx to *array*
+	mov rdx, [rsp + 20h]			; set rdx to *temp*
+	mov r8, [rsp + 18h]				; set r8 to *start*
+	mov r9, [rsp + 8h]				; set r9 to *middle*
 	call asmMergeSortRecursive		; sort left half of the array
 
-	mov rcx, [rsp + 20h]			; set rcx to *array*
-	mov rdx, [rsp + 8h]				; set rdx to *middle*
-	inc rdx							; set rdx to (*middle* + 1)
-	mov r8, [rsp + 10h]				; set r8 to *end*
+	mov rcx, [rsp + 28h]			; set rcx to *array*
+	mov rdx, [rsp + 20h]			; set rdx to *temp*
+	mov r8, [rsp + 8h]				; set r8 to *middle*
+	inc r8							; set r8 to (*middle* + 1)
+	mov r9, [rsp + 10h]				; set r9 to *end*
 	call asmMergeSortRecursive		; sort right half of the array
 
-	mov rcx, [rsp + 20h]			; set rcx to *array*
-	mov rdx, [rsp + 18h]			; set rdx to *start*
-	mov r8, [rsp + 8h]				; set r8 to *middle*
+	mov rcx, [rsp + 28h]			; set rcx to *array*
+	mov rdx, [rsp + 20h]			; set rdx to *temp*
+	mov r8, [rsp + 18h]				; set r8 to *start*
 	mov r9, [rsp + 10h]				; set r9 to *end*
-	call _inplaceMerge				; merge the two halves of the array
+	mov r10, [rsp + 8h]				; set r10 to *middle*
+	call asmInplaceMerge			; merge the two halves of the array
 
 	done:							; label for Base Case
 
-	add rsp, 20h					; restore stack pointer
+	add rsp, 30h					; restore stack pointer
 	pop rbp							; pop base pointer
 	ret								; return from function
 asmMergeSortRecursive ENDP
@@ -295,5 +298,92 @@ asmSwap PROC
     pop rbp						; pop base pointer
     ret							; return from function
 asmSwap ENDP
+
+asmInplaceMerge PROC
+	; rcx to *array*
+	; rdx to *temp*
+	; r8 to *leftStart*
+	; r9 to *rightEnd*
+	; r10 to *leftEnd*
+	; r11 to *rightStart*
+	; r12 to *size*
+	; r13 to *left*
+	; r14 to *right*
+	; r15 to *index*
+
+	push rbp					; push base pointer
+
+	mov r11, r10
+	inc r11
+
+	mov r12, r9
+	sub r12, r8
+	inc r12
+
+	mov r13, r8
+	mov r14, r11
+	mov r15, r8
+
+	asmInplaceMergeLoop:
+		mov eax, SDWORD PTR [rcx + r13 * SDWORD]	; array[left]
+		mov ebx, SDWORD PTR [rcx + r14 * SDWORD]	; array[right]
+
+		cmp eax, ebx
+		jbe leftLower
+		jmp rightLower
+
+		leftLower:
+			mov [rdx + r15 * SDWORD], eax
+			inc r13
+			jmp testing
+		rightLower:
+			mov [rdx + r15 * SDWORD], ebx
+			inc r14
+			jmp testing
+
+		testing:
+
+		inc r15
+
+		cmp r13, r10
+		ja copyRightRemainder
+		cmp r14, r9
+		ja copyLeftRemainder
+		jmp asmInplaceMergeLoop
+
+	copyRightRemainder:
+		mov ebx, SDWORD PTR [rcx + r14 * SDWORD]	; array[right]
+		mov [rdx + r15 * SDWORD], ebx
+
+		inc r15
+		inc r14
+		cmp r14, r9
+		jbe copyRightRemainder
+	jmp mergeDone
+
+	copyLeftRemainder:
+		mov eax, SDWORD PTR [rcx + r13 * SDWORD]	; array[left]
+		mov [rdx + r15 * SDWORD], eax
+
+		inc r15
+		inc r13
+		cmp r13, r10
+		jbe copyLeftRemainder
+
+	mergeDone:
+
+	mov r15, r8
+
+	copyTempToArray:
+		mov eax, SDWORD PTR [rdx + r15 * SDWORD]
+		mov [rcx + r15 * SDWORD], eax
+
+		inc r15
+		cmp r15, r9
+		jne copyTempToArray
+		
+	pop rbp						; pop base pointer
+    ret							; return from function
+asmInplaceMerge ENDP
 
 END
