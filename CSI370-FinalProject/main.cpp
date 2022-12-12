@@ -1,13 +1,13 @@
 // A program that compares various sorting algorithms written in Assembly and C++
 // CSI370 - Final Project
 // Author: Cameron LaBounty & Hunter Gale
-// Date: 12/6/2022
+// Date: 12/12/2022
 
 #include <iostream>
 #include <iomanip>
-#include <string>
-#include <algorithm>
 #include <chrono>
+#include <assert.h>
+#include "util.h"
 #include "sort.h"
 
 using namespace std;
@@ -18,9 +18,8 @@ extern "C" void asmShellSort(int array[], const int length);
 extern "C" void asmQuickSort(int array[], const int start, const int end);
 extern "C" void asmMergeSort(int array[], int temp[], const int start, const int end);
 
-extern "C" int _randomIndex(int start, int end) {
-	uniform_int_distribution<> distr(start, end);
-	return distr(rng);
+extern "C" int _randomInRange(int start, int end) {
+	return randomInRange(start, end);
 }
 
 enum SORT_ALGORITHM {
@@ -36,9 +35,8 @@ enum LANGUAGE {
 	CPP
 };
 
-int timeSort(int array[], SORT_ALGORITHM algorithm, LANGUAGE language);
+long long int timeSort(int array[], SORT_ALGORITHM algorithm, LANGUAGE language);
 void sort(int array[], SORT_ALGORITHM algorithm, LANGUAGE language);
-string formatWithCommas(int value);
 
 const int N = 10000;
 
@@ -54,25 +52,25 @@ int main() {
 	// Execute and time each sort algorithm with a copy of the original array
 	int arrayCopy[N];
 	copy(begin(array), end(array), begin(arrayCopy));
-	int bubbleSortCppTime = timeSort(arrayCopy, BUBBLE_SORT, CPP);
+	auto bubbleSortCppTime = timeSort(arrayCopy, BUBBLE_SORT, CPP);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int bubbleSortAsmTime = timeSort(arrayCopy, BUBBLE_SORT, ASSEMBLY);
+	auto bubbleSortAsmTime = timeSort(arrayCopy, BUBBLE_SORT, ASSEMBLY);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int selectionSortCppTime = timeSort(arrayCopy, SELECTION_SORT, CPP);
+	auto selectionSortCppTime = timeSort(arrayCopy, SELECTION_SORT, CPP);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int selectionSortAsmTime = timeSort(arrayCopy, SELECTION_SORT, ASSEMBLY);
+	auto selectionSortAsmTime = timeSort(arrayCopy, SELECTION_SORT, ASSEMBLY);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int shellSortCppTime = timeSort(arrayCopy, SHELL_SORT, CPP);
+	auto shellSortCppTime = timeSort(arrayCopy, SHELL_SORT, CPP);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int shellSortAsmTime = timeSort(arrayCopy, SHELL_SORT, ASSEMBLY);
+	auto shellSortAsmTime = timeSort(arrayCopy, SHELL_SORT, ASSEMBLY);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int quickSortCppTime = timeSort(arrayCopy, QUICK_SORT, CPP);
+	auto quickSortCppTime = timeSort(arrayCopy, QUICK_SORT, CPP);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int quickSortAsmTime = timeSort(arrayCopy, QUICK_SORT, ASSEMBLY);
+	auto quickSortAsmTime = timeSort(arrayCopy, QUICK_SORT, ASSEMBLY);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int mergeSortCppTime = timeSort(arrayCopy, MERGE_SORT, CPP);
+	auto mergeSortCppTime = timeSort(arrayCopy, MERGE_SORT, CPP);
 	copy(begin(array), end(array), begin(arrayCopy));
-	int mergeSortAsmTime = timeSort(arrayCopy, MERGE_SORT, ASSEMBLY);
+	auto mergeSortAsmTime = timeSort(arrayCopy, MERGE_SORT, ASSEMBLY);
 
 	// Format each value with commas using a helper function
 	string bubbleSortCppTimeStr = formatWithCommas(bubbleSortCppTime);
@@ -136,10 +134,11 @@ int main() {
 	return EXIT_SUCCESS;
 }
 
-int timeSort(int array[], SORT_ALGORITHM algorithm, LANGUAGE language) {
+long long int timeSort(int array[], SORT_ALGORITHM algorithm, LANGUAGE language) {
 	chrono::steady_clock::time_point start = chrono::steady_clock::now();
 	sort(array, algorithm, language);
 	chrono::steady_clock::time_point stop = chrono::steady_clock::now();
+	assert(is_sorted_until(array, array + N));
 	return chrono::duration_cast<chrono::nanoseconds>(stop - start).count();
 }
 
@@ -183,16 +182,4 @@ void sort(int array[], SORT_ALGORITHM algorithm, LANGUAGE language) {
 				break;
 		}
 	}
-}
-
-// Credit: https://stackoverflow.com/a/24192835
-string formatWithCommas(int value) {
-	auto s = to_string(value);
-	int n = s.length() - 3;
-	int end = (value >= 0) ? 0 : 1;
-	while (n > end) {
-		s.insert(n, ",");
-		n -= 3;
-	}
-	return s;
 }

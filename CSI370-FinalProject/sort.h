@@ -1,19 +1,16 @@
 // A program that compares various sorting algorithms written in Assembly and C++
 // CSI370 - Final Project
 // Author: Cameron LaBounty & Hunter Gale
-// Date: 12/4/2022
+// Date: 12/12/2022
 
 #ifndef SORT_H
 #define SORT_H
 
-#include <algorithm>
 #include <random>
+#include <algorithm>
+#include "util.h"
 
 using namespace std;
-
-// setup random number generator
-static random_device rd;
-static mt19937 rng(rd());
 
 void bubbleSort(int array[], const int length) {
     for (int i = 0; i < length - 1; i++) {
@@ -36,31 +33,17 @@ void selectionSort(int array[], const int length) {
 }
 
 void shellSort(int array[], const int length) {
-    // C++ implementation taken from here:
-    // https://www.geeksforgeeks.org/shellsort/
-    
-    // Start with a big gap, then reduce the gap
-    for (int gap = length / 2; gap > 0; gap /= 2)
-    {
-        // Do a gapped insertion sort for this gap size.
-        // The first gap elements a[0..gap-1] are already in gapped order
-        // keep adding one more element until the entire array is
-        // gap sorted
-        for (int i = gap; i < length; i++)
-        {
-            // add a[i] to the elements that have been gap sorted
-            // save a[i] in temp and make a hole at position i
+    int gap = length / 2;
+    while (gap > 0) {
+        for (int i = gap; i < length; i++) {
             int temp = array[i];
-
-            // shift earlier gap-sorted elements up until the correct
-            // location for a[i] is found
             int j;
-            for (j = i; j >= gap && array[j - gap] > temp; j -= gap)
+            for (j = i; j >= gap && array[j - gap] > temp; j -= gap) {
                 array[j] = array[j - gap];
-
-            //  put temp (the original a[i]) in its correct location
+            }
             array[j] = temp;
         }
+        gap /= 2;
     }
 }
 
@@ -72,8 +55,7 @@ void quickSort(int array[], const int start, const int end) {
     // Recursive Case: choose a random pivot and partion the array into a section with
     // elements less than the pivot and a section with elements greater than the pivot
     // generate the random pivot
-    uniform_int_distribution<> distr(start, end);
-    int pivot = distr(rng);
+    int pivot = randomInRange(start, end);
 
     // move the pivot to the front
     swap(array[pivot], array[start]);
