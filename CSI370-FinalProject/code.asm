@@ -166,7 +166,7 @@ asmQuickSort PROC
 
 	; Base Case
 	cmp rdx, r8										; compare start and end
-	jae quickDone									; base case reached if start >= end
+	jge quickDone									; base case reached if start >= end
 
 	; Recursive Case
 	mov rcx, rdx									; move start to rcx
@@ -185,6 +185,9 @@ asmQuickSort PROC
 	mov rax, rbx									; move start into rax for counter (i)
 	inc rax											; i starts at start + 1
 	quickLoop:										; label for loop
+		cmp rax, [rsp + 10h]						; compare i and end
+		ja endQuickLoop								; break from loop if i > end
+
 		mov r8, [rsp + 20h]							; move array into r8
 		mov r11, [rsp + 18h]						; move start into r11
 		mov r9d, SDWORD PTR [r8 + rax * SDWORD]		; set r9d to the value of array[i]
@@ -202,8 +205,9 @@ asmQuickSort PROC
 		skipQuickLoopCondition:						; label for skipping condition in loop
 
 		inc rax										; increment i
-		cmp rax, [rsp + 10h]						; compare i and end
-		jle quickLoop								; continue looping if i <= end
+		jmp quickLoop								; continue looping
+	
+	endQuickLoop:									; label for end of loop
 	
 	mov [rsp + 8h], rbx								; store lastSmaller in shadow space
 
